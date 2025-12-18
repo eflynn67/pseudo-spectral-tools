@@ -23,7 +23,7 @@ x_bndry = (-5,5)
 ###############################################################################
 # Global B-spline parameters
 splOrder = 11 #aka, k 
-N_knots = 21
+N_knots = 50
 knotFunc_params = {'beta': 0.0}
 
 ###############################################################################
@@ -37,24 +37,26 @@ bndry_vals_x = [0.0,0.0]
 knotArr, delta_x_knots = bspline.getKnots(x_bndry[0],x_bndry[1],N_knots,splOrder,
                                           knotFunc = bspline.arcsin_transform,knotFunc_params=knotFunc_params,
                                           extensionMethod='extension')
-
+print(knotArr)
 ###############################################################################
 # Generate x-collocation points
 ###############################################################################
 cPnts,bndry_pnts = bspline.getCPnts(splOrder,knotArr,x_bndry)
-B = bspline.BMatrix(splOrder,knotArr,cPnts,bndry='dirichlet',multiprocessing = True)
-
+B = bspline.BMatrix(splOrder,knotArr,cPnts,bndry='periodic',multiprocessing = False)
+print(f'B Condition number: {np.linalg.cond(B)}')
 # Generate the beta matrix that will contain the boundary conditions 
 # and construct the B_tilde by appending beta onto B
 K_matrix = bspline.getKmatrix(splOrder,bndry='dirichlet')
-B_tilde,beta = bspline.betaMatrix(splOrder,knotArr,B,K_matrix,bndry_pnts,bndry='dirichlet',multiprocessing = True)
-C_tilde = bspline.getCtilde(B_tilde,splOrder,bndry='dirichlet',bndryVals=bndry_vals_x)
+B_tilde,beta = bspline.betaMatrix(splOrder,knotArr,B,K_matrix,bndry_pnts,bndry='periodic',multiprocessing = False)
+C_tilde = bspline.getCtilde(B_tilde,splOrder,bndry='periodic',bndryVals=bndry_vals_x)
 
 
-weights = bspline.getWeights(knotArr,C_tilde,splOrder,bndry='dirichlet')
+weights = bspline.getWeights(knotArr,C_tilde,splOrder,bndry='periodic')
 
-D1 = bspline.getDMatrix(1,splOrder,knotArr,cPnts,C_tilde,bndry='dirichlet')
-D2 = bspline.getDMatrix(2,splOrder,knotArr,cPnts,C_tilde,bndry='dirichlet')
+D1 = bspline.getDMatrix(1,splOrder,knotArr,cPnts,C_tilde,bndry='periodic')
+print(f'D1 Condition number: {np.linalg.cond(D1)}')
+D2 = bspline.getDMatrix(2,splOrder,knotArr,cPnts,C_tilde,bndry='periodic')
+print(f'D2 Condition number: {np.linalg.cond(D2)}')
 
 print(f'D1 anti-hermitian check: {np.linalg.norm(D1 + D1.T.conj())}')
 

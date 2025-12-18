@@ -16,7 +16,7 @@ def test_func2_D1(xArr):
     return np.sign(xArr)*np.exp(-np.abs(xArr))
 
 
-NArr = [15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]
+NArr = [20,30,40,50,60,70,80,90,100,110,120]
 D1_L2 = np.zeros(len(NArr))
 D2_L2 = np.zeros(len(NArr))
 indef_L2 = np.zeros(len(NArr))
@@ -26,11 +26,11 @@ for i,N in enumerate(NArr):
     ###############################################################################
     # Domain boundaries
     ###############################################################################
-    x_bndry = (-5,5)
+    x_bndry = (-10,10)
 
     ###############################################################################
     # Global B-spline parameters
-    splOrder = 11 #aka, k 
+    splOrder = 5 #aka, k 
     N_knots = N
     knotFunc_params = {'beta': 0.0}
 
@@ -70,7 +70,9 @@ for i,N in enumerate(NArr):
     dfArr = np.einsum('ij,j->i',D1,fArr)
     D1_L2[i] = np.linalg.norm(test_func_D1(cPnts)-dfArr)
     print(f'D1 L2 Error: {np.linalg.norm(test_func_D1(cPnts)-dfArr)}')
-
+    plt.plot(cPnts,test_func_D1(cPnts))
+    plt.plot(cPnts,dfArr)
+    plt.show()
 
     print(f'D2 Hermitian Check: {np.linalg.norm(D2 - D2.T.conj())}')
 
